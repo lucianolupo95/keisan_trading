@@ -1,0 +1,174 @@
+================================================================================
+                    KEISAN TRADING - ESTRUCTURA Y ACCESOS
+                              DÍA 1 COMPLETADO
+================================================================================
+
+📍 UBICACIÓN RAÍZ:
+C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\
+
+================================================================================
+📋 LOGS Y DOCUMENTACIÓN
+================================================================================
+
+🔴 LOGS TÉCNICOS (Decisiones, código, problemas):
+   📂 logs/
+      └── Dia_1_Log.md                    [25/11/2025]
+
+🟡 DOCUMENTACIÓN GENERAL:
+   📂 docs/
+      ├── Resumen_25_11_2025.md           [Resumen ejecutivo Day 1]
+      ├── Flashcards_25_11_2025.md        [12 tarjetas Anki para aprender]
+      └── Resumen_26_11_2025.md           [PENDIENTE - Day 2]
+
+🟢 PLAN DE ACCIÓN:
+   📄 TODO_MAÑANA.md                      [Tareas para Day 2]
+   📄 ESTRUCTURA_Y_ACCESOS.txt            [Este archivo]
+
+================================================================================
+📂 MÓDULOS DE CÓDIGO
+================================================================================
+
+🔵 FUUTON (Go - Viento):
+   📂 fuuton-go/
+      ├── main.go                         [82 líneas - FUNCIONAL ✅]
+      ├── data.csv                        [3 velas - Test OK ✅]
+      └── katon_caller.go                 [PENDIENTE Day 2]
+
+   TEST:  cd fuuton-go && go run main.go
+   OUTPUT: 3 BUY signals ✅
+
+🟠 KATON (Python - Fuego):
+   📂 katon-python/
+      └── ping.py                         [22 líneas - FUNCIONAL ✅]
+
+   TEST:  cd katon-python && python ping.py
+   OUTPUT: Katon OK + simple_feature(5)=10 ✅
+
+🔵 SUITON (R - Agua):
+   📂 suiton-r/
+      └── ping.R                          [18 líneas - PENDIENTE Rscript ⏳]
+
+   TEST:  cd suiton-r && Rscript ping.R
+   STATUS: Esperando instalación de R
+
+🟢 DOTON (C# - Tierra):
+   📂 doton-csharp/
+      └── KeisanBridge.cs                 [23 líneas - PENDIENTE compilador ⏳]
+
+   TEST:  cd doton-csharp && csc KeisanBridge.cs && KeisanBridge.exe
+   STATUS: Esperando instalación de C# compiler
+
+================================================================================
+🎯 QUICK START PARA MAÑANA
+================================================================================
+
+OPCIÓN 1 - Automático (RECOMENDADO):
+   Simplemente di: "Narutrader, haz lo de hoy"
+
+   Narutrader automáticamente:
+   ✓ Lee TODO_MAÑANA.md
+   ✓ Ejecuta todas las tareas en orden
+   ✓ Pide confirmación después de cada una
+   ✓ Genera logs + resumen + flashcards
+   ✓ Cierra el día y actualiza TODO_MAÑANA.md
+
+OPCIÓN 2 - Manual (Para testear solo una cosa):
+   cd C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\fuuton-go
+   go run main.go
+
+================================================================================
+📊 STATS DÍA 1
+================================================================================
+
+Módulos creados:        4/4 ✅
+Archivos generados:     9 archivos
+Líneas de código:       168 líneas
+Decisiones técnicas:    7 documentadas
+Flashcards:             12 tarjetas
+Funcional:              2/4 (Go + Python OK)
+Pendiente:              2/4 (R y C# - esperan compiladores)
+
+================================================================================
+📍 DÓNDE ENCONTRAR CADA COSA
+================================================================================
+
+¿Dónde están los LOGS?
+   → C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\logs\
+
+¿Dónde está el RESUMEN de hoy?
+   → C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\docs\Resumen_25_11_2025.md
+
+¿Dónde están las FLASHCARDS?
+   → C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\docs\Flashcards_25_11_2025.md
+
+¿Qué hay que hacer mañana?
+   → C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\TODO_MAÑANA.md
+
+¿Dónde está el CÓDIGO?
+   → C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\fuuton-go\
+   → C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\katon-python\
+   → C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\suiton-r\
+   → C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\doton-csharp\
+
+================================================================================
+🔑 ARCHIVOS IMPORTANTES PARA COPIAR/BACKUP
+================================================================================
+
+Si quieres hacer backup, copia estas carpetas:
+   ✓ logs/                     [Histórico de decisiones]
+   ✓ docs/                     [Resúmenes y flashcards]
+   ✓ fuuton-go/                [Código Go]
+   ✓ katon-python/             [Código Python]
+   ✓ suiton-r/                 [Código R]
+   ✓ doton-csharp/             [Código C#]
+
+================================================================================
+🚀 PRÓXIMAS SESIONES
+================================================================================
+
+DÍA 2 (26/11/2025):
+   ✓ Probar R (Suiton) - si instalar Rscript
+   ✓ Probar C# (Doton) - si instalar csc
+   ✓ Integración Go → Python
+   ✓ Mejorar signal generator con filtros
+   ✓ CSV con 50 velas
+
+DÍA 3 (27/11/2025):
+   ✓ Integración Go → R (estadísticas)
+   ✓ Primeros backtests
+   ✓ Documentación de estadísticas
+
+DÍA 4+ (28/11 en adelante):
+   ✓ Integración Go → C# (ejecución)
+   ✓ Pipeline completo 4/4
+   ✓ Trading vivo (SIM)
+   ✓ Optimizaciones
+
+================================================================================
+💡 TIPS PARA LUCHITO
+================================================================================
+
+1. PARA VER LOGS:
+   Abre con notepad o tu editor:
+   C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\logs\Dia_1_Log.md
+
+2. PARA VER FLASHCARDS:
+   Abre con notepad o tu editor:
+   C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\docs\Flashcards_25_11_2025.md
+   (Formato: Puedes copiar y pegar en Anki)
+
+3. PARA VER RESUMEN:
+   Abre:
+   C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\docs\Resumen_25_11_2025.md
+
+4. PARA TESTEAR MANUAL:
+   cd C:\Cosas_Lucho\Programacion\Proyectos\KeisanTrading\fuuton-go
+   go run main.go
+
+5. PARA MAÑANA:
+   Solo dile a Narutrader: "Haz lo de hoy"
+
+================================================================================
+                            FIN DE DOCUMENTO
+                         Generado: 25/11/2025
+================================================================================
