@@ -23,6 +23,16 @@ reports/
 
 ---
 
+## 🔗 GITHUB
+
+**Repositorio**: https://github.com/lucianolupo95/keisan_trading
+**Branch**: `main`
+**Status**: ✅ Synced
+
+Cada día se pusheará automáticamente.
+
+---
+
 ## 🎯 PARA LUCHITO - LO QUE NECESITAS SABER
 
 ### Mañana (Day 2)
