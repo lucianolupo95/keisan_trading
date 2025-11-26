@@ -60,9 +60,21 @@ func ReadCSV(filename string) ([]Candle, error) {
 	return candles, nil
 }
 
-// GenerateSignal genera una señal BUY si close > open
+// GenerateSignal genera una señal BUY con filtros de volumen y movimiento
 func GenerateSignal(candle Candle) string {
-	if candle.Close > candle.Open {
+	const minVolume int64 = 1300
+	const minMovePercent float64 = 0.1  // 0.1%
+
+	// Filtro de volumen mínimo
+	if candle.Volume < minVolume {
+		return "HOLD"  // Volumen insuficiente
+	}
+
+	// Calcular movimiento porcentual
+	movePercent := ((candle.Close - candle.Open) / candle.Open) * 100
+
+	// Filtro de movimiento mínimo
+	if candle.Close > candle.Open && movePercent >= minMovePercent {
 		return "BUY"
 	}
 	return "HOLD"
