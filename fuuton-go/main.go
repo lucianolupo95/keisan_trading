@@ -92,13 +92,25 @@ func main() {
 		log.Fatalf("Error al leer CSV: %v", err)
 	}
 
-	fmt.Printf("Velas leídas: %d\n", len(candles))
-	fmt.Println()
+	fmt.Printf("Velas leídas: %d\n\n", len(candles))
 
 	// Generar señales
+	fmt.Println("=== SEÑALES GENERADAS ===\n")
 	for i, candle := range candles {
 		signal := GenerateSignal(candle)
 		fmt.Printf("Vela %d - Timestamp: %s | Open: %.2f | Close: %.2f | Signal: %s\n",
 			i+1, candle.Timestamp, candle.Open, candle.Close, signal)
 	}
+
+	// Ejecutar orquestador
+	fmt.Println("\n\n=== EJECUTANDO ORQUESTADOR ===\n")
+	config := OrchestratorConfig{
+		InitialCapital:     10000.0,
+		UseKaton:           false, // Deshabilitado por ahora
+		UseEnhancedSignals: false,
+		Verbose:            true,
+	}
+	orchestrator := NewOrchestrator(candles, config)
+	orchestratorResult := orchestrator.Run()
+	orchestratorResult.PrintReport()
 }
