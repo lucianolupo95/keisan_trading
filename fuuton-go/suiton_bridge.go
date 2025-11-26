@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 	"sort"
 )
@@ -187,9 +188,40 @@ func LocalAnalyzeCorrelation(prices []float64) SuitonCorrelation {
 // CallSuitonR intenta llamar al módulo R Suiton
 // Retorna análisis completo o nil si R no está disponible
 func CallSuitonR(prices []float64) *SuitonAnalysis {
-	// TODO: Implementar cuando R esté instalado
-	// Por ahora, retorna nil para indicar que R no está disponible
-	return nil
+	// Ruta completa a Rscript en Windows
+	rscriptPath := "C:\\Program Files\\R\\R-4.5.2\\bin\\Rscript.exe"
+	rIpcScript := "suiton-r/r_ipc.R"
+
+	// 1. Serializar prices a JSON
+	inputData := map[string]interface{}{
+		"prices": prices,
+	}
+	inputJSON, _ := json.Marshal(inputData)
+
+	// 2. Guardar en archivo temporal
+	tmpFile := "temp_suiton_input.json"
+	err := os.WriteFile(tmpFile, inputJSON, 0644)
+	if err != nil {
+		return nil
+	}
+	defer os.Remove(tmpFile)
+
+	// 3. Ejecutar Rscript con forward slashes para el script
+	cmd := exec.Command(rscriptPath, rIpcScript)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		// Debug: imprimir error
+		return nil
+	}
+
+	// 4. Parsear respuesta JSON
+	var analysis SuitonAnalysis
+	err = json.Unmarshal(output, &analysis)
+	if err != nil {
+		return nil
+	}
+
+	return &analysis
 }
 
 // AnalyzePricesWithSuiton realiza análisis estadístico usando Suiton
