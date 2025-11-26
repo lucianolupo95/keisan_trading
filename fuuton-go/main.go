@@ -81,10 +81,14 @@ func GenerateSignal(candle Candle) string {
 }
 
 func main() {
-	fmt.Println("Fuuton activo")
-	response := Ping()
-	fmt.Printf("Ping response: %s\n", response)
+	fmt.Println("╔════════════════════════════════════════════════════════════╗")
+	fmt.Println("║           FUUTON: Trading System - Day 4                   ║")
+	fmt.Println("║       Go + Python (Katon) + R (Suiton) Integration         ║")
+	fmt.Println("╚════════════════════════════════════════════════════════════╝")
 	fmt.Println()
+
+	response := Ping()
+	fmt.Printf("✓ %s\n\n", response)
 
 	// Leer CSV
 	candles, err := ReadCSV("data.csv")
@@ -92,25 +96,58 @@ func main() {
 		log.Fatalf("Error al leer CSV: %v", err)
 	}
 
-	fmt.Printf("Velas leídas: %d\n\n", len(candles))
+	fmt.Printf("✓ Velas leídas: %d\n\n", len(candles))
 
-	// Generar señales
-	fmt.Println("=== SEÑALES GENERADAS ===\n")
-	for i, candle := range candles {
-		signal := GenerateSignal(candle)
-		fmt.Printf("Vela %d - Timestamp: %s | Open: %.2f | Close: %.2f | Signal: %s\n",
-			i+1, candle.Timestamp, candle.Open, candle.Close, signal)
+	// ========== SUITON ANALYSIS ==========
+	analysis := AnalyzePricesWithSuiton(candles)
+	if analysis != nil {
+		PrintSuitonAnalysis(analysis)
 	}
 
-	// Ejecutar orquestador
+	// ========== GENERAR SEÑALES ==========
+	fmt.Println("\n\n=== SEÑALES GENERADAS (CON ANÁLISIS ESTADÍSTICO) ===\n")
+	buyCount := 0
+	for i, candle := range candles {
+		var signal string
+		if analysis != nil {
+			signal = GenerateEnhancedSignal(candle, analysis, i)
+		} else {
+			signal = GenerateSignal(candle)
+		}
+
+		if signal != "HOLD" {
+			buyCount++
+		}
+
+		// Mostrar solo cada 10 velas para no saturar output
+		if (i+1)%10 == 1 || (i+1)%10 == 0 {
+			fmt.Printf("Vela %d - %s | Open: %.2f | Close: %.2f | Signal: %s\n",
+				i+1, candle.Timestamp, candle.Open, candle.Close, signal)
+		}
+	}
+	fmt.Printf("\nTotal BUY signals: %d / %d velas\n", buyCount, len(candles))
+
+	// ========== EJECUTAR ORQUESTADOR ==========
 	fmt.Println("\n\n=== EJECUTANDO ORQUESTADOR ===\n")
 	config := OrchestratorConfig{
 		InitialCapital:     10000.0,
 		UseKaton:           false, // Deshabilitado por ahora
-		UseEnhancedSignals: false,
+		UseEnhancedSignals: analysis != nil, // Usar señales mejoradas si análisis disponible
 		Verbose:            true,
 	}
 	orchestrator := NewOrchestrator(candles, config)
 	orchestratorResult := orchestrator.Run()
 	orchestratorResult.PrintReport()
+
+	// ========== ESTADÍSTICAS FINALES ==========
+	if analysis != nil {
+		stats := ComputeSuitonStats(analysis, candles)
+		fmt.Println("\n\n=== ESTADÍSTICAS FINALES ===\n")
+		fmt.Printf("Total de precios analizados: %d\n", stats.TotalPrices)
+		fmt.Printf("Precio promedio: %.2f\n", stats.MeanPrice)
+		fmt.Printf("Desviación estándar: %.2f\n", stats.StdDeviation)
+		fmt.Printf("Volatilidad: %.2f%%\n", stats.VolatilityPct)
+		fmt.Printf("Distribución normal: %v\n", stats.IsNormal)
+		fmt.Printf("Fuerza del trend: %.4f\n", stats.TrendStrength)
+	}
 }
