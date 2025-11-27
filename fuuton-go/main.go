@@ -104,13 +104,24 @@ func main() {
 		PrintSuitonAnalysis(analysis)
 	}
 
-	// ========== GENERAR SEÑALES ==========
-	fmt.Println("\n\n=== SEÑALES GENERADAS (CON ANÁLISIS ESTADÍSTICO) ===\n")
+	// ========== GENERAR SEÑALES CON INDICADORES TÉCNICOS (Day 5) ==========
+	fmt.Println("\n\n=== SEÑALES GENERADAS (ESTADÍSTICA + INDICADORES TÉCNICOS) ===\n")
 	buyCount := 0
+	var technicalIndicators IndicatorAnalysis
+
+	// Extract prices once for indicator calculations
+	prices := ExtractClosePrices(candles)
+
 	for i, candle := range candles {
 		var signal string
+
+		// Calculate technical indicators at each step
+		if i >= 26 { // Need at least 26 candles for MACD
+			technicalIndicators = AnalyzeTechnicalIndicators(prices[:i+1])
+		}
+
 		if analysis != nil {
-			signal = GenerateEnhancedSignal(candle, analysis, i)
+			signal = GenerateEnhancedSignalWithIndicators(candle, analysis, i, technicalIndicators)
 		} else {
 			signal = GenerateSignal(candle)
 		}

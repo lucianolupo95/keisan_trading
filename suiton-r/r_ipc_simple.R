@@ -1,18 +1,12 @@
 # ============================================================================
-# R IPC (Inter-Process Communication) Module
+# R IPC (Inter-Process Communication) - SIMPLIFIED VERSION
 # Para comunicación Go ↔ R via JSON
-# Day 4 - 28/11/2025
+# Day 5 - 2025-11-27
 # ============================================================================
 
-# Load libraries
+# Load only e1071 library
 suppressMessages({
   library(e1071)
-  tryCatch({
-    library(jsonlite)
-  }, error = function(e) {
-    # jsonlite no disponible, usar método alternativo
-    cat("Warning: jsonlite not available\n")
-  })
 })
 
 # ============================================================================
@@ -79,61 +73,126 @@ test_normality <- function(prices) {
 }
 
 # ============================================================================
-# IPC MAIN FUNCTION
+# MANUAL JSON OUTPUT FUNCTION
+# ============================================================================
+
+list_to_json <- function(lst, indent = "") {
+  # Simple recursive function to convert R list to JSON string
+  if (is.null(lst)) {
+    return("null")
+  }
+
+  if (is.logical(lst)) {
+    return(tolower(as.character(lst)))
+  }
+
+  if (is.numeric(lst) && length(lst) == 1) {
+    return(as.character(lst))
+  }
+
+  if (is.character(lst) && length(lst) == 1) {
+    return(paste0('"', lst, '"'))
+  }
+
+  if (is.list(lst)) {
+    # Check if it's a named list (object) or unnamed (array)
+    if (is.null(names(lst))) {
+      # Array
+      items <- lapply(seq_along(lst), function(i) {
+        paste0(indent, "  ", list_to_json(lst[[i]], paste0(indent, "  ")))
+      })
+      return(paste0("[\n", paste(items, collapse = ",\n"), "\n", indent, "]"))
+    } else {
+      # Object
+      items <- lapply(names(lst), function(name) {
+        value_json <- list_to_json(lst[[name]], paste0(indent, "  "))
+        paste0(indent, '  "', name, '": ', value_json)
+      })
+      return(paste0("{\n", paste(items, collapse = ",\n"), "\n", indent, "}"))
+    }
+  }
+
+  return(as.character(lst))
+}
+
+# ============================================================================
+# PARSE JSON FROM FILE
+# ============================================================================
+
+parse_json_file <- function(filename) {
+  # Read JSON file manually
+  content <- readLines(filename)
+  json_str <- paste(content, collapse = "")
+
+  # Very simple JSON parser for {"prices":[...]}
+  tryCatch({
+    # Extract the prices array
+    prices_start <- gregexpr('"prices"\\s*:\\s*\\[', json_str)[[1]][1]
+    if (prices_start == -1) {
+      stop("prices not found in JSON")
+    }
+
+    # Find the array
+    array_start <- prices_start + nchar('"prices":[')
+    array_end <- gregexpr('\\]', json_str)[[1]][1]
+
+    prices_str <- substr(json_str, array_start, array_end - 1)
+
+    # Split by comma and convert to numeric
+    prices <- as.numeric(unlist(strsplit(prices_str, ",")))
+
+    return(list(prices = prices))
+  }, error = function(e) {
+    cat(sprintf('{"error": "Failed to parse JSON: %s"}\n', e$message))
+    quit(status = 1)
+  })
+}
+
+# ============================================================================
+# MAIN IPC FUNCTION
 # ============================================================================
 
 main_ipc <- function() {
-  # Leer argumentos de línea de comandos
+  # Get command line arguments
   args <- commandArgs(trailingOnly = TRUE)
 
   if (length(args) == 0) {
-    # Si no hay argumentos, usar datos de demo
+    # Demo mode
     set.seed(42)
     prices <- 1500 + seq(0, 50, length.out = 35) + rnorm(35, mean = 0, sd = 5)
   } else {
-    # Leer precios desde archivo JSON
+    # Read from JSON file
     input_file <- args[1]
 
     if (!file.exists(input_file)) {
-      stop(sprintf("Input file not found: %s", input_file))
+      cat(sprintf('{"error": "File not found: %s"}\n', input_file))
+      quit(status = 1)
     }
 
-    # Parsear JSON
-    tryCatch({
-      data <- fromJSON(input_file)
-      prices <- as.numeric(data$prices)
-
-      if (length(prices) < 3) {
-        stop("Need at least 3 prices")
-      }
-    }, error = function(e) {
-      stop(sprintf("Error parsing JSON: %s", e$message))
-    })
+    json_data <- parse_json_file(input_file)
+    prices <- json_data$prices
   }
 
-  # ========== ANÁLISIS ==========
+  # Perform analysis
   distribution <- analyze_distribution(prices)
   normality <- test_normality(prices)
   correlation <- calculate_correlation(prices)
 
-  # ========== RESULTADO ==========
+  # Build result
   result <- list(
     distribution = distribution,
     normality = normality,
     correlation = correlation,
-    timestamp = Sys.time()
+    timestamp = as.character(Sys.time())
   )
 
-  # ========== OUTPUT JSON ==========
-  output_json <- toJSON(result, auto_unbox = TRUE, pretty = TRUE)
-  cat(output_json)
+  # Convert to JSON and print
+  json_output <- list_to_json(result)
+  cat(json_output)
+  cat("\n")
 }
 
-# ============================================================================
-# EJECUTAR
-# ============================================================================
-
-# Ejecutar IPC si está corriendo como script
+# Execute if running as script
 if (!interactive()) {
   main_ipc()
 }

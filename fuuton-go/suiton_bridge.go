@@ -190,7 +190,7 @@ func LocalAnalyzeCorrelation(prices []float64) SuitonCorrelation {
 func CallSuitonR(prices []float64) *SuitonAnalysis {
 	// Ruta completa a Rscript en Windows
 	rscriptPath := "C:\\Program Files\\R\\R-4.5.2\\bin\\Rscript.exe"
-	rIpcScript := "suiton-r/r_ipc.R"
+	rIpcScript := "suiton-r/r_ipc_simple.R" // Using simplified version that doesn't need jsonlite
 
 	// 1. Serializar prices a JSON
 	inputData := map[string]interface{}{
@@ -206,11 +206,13 @@ func CallSuitonR(prices []float64) *SuitonAnalysis {
 	}
 	defer os.Remove(tmpFile)
 
-	// 3. Ejecutar Rscript con forward slashes para el script
-	cmd := exec.Command(rscriptPath, rIpcScript)
+	// 3. Ejecutar Rscript pasando el archivo como argumento
+	// r_ipc.R leerá el JSON del archivo y retornará JSON
+	cmd := exec.Command(rscriptPath, rIpcScript, tmpFile)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		// Debug: imprimir error
+		fmt.Printf("R error: %v\nOutput: %s\n", err, string(output))
 		return nil
 	}
 
@@ -218,6 +220,7 @@ func CallSuitonR(prices []float64) *SuitonAnalysis {
 	var analysis SuitonAnalysis
 	err = json.Unmarshal(output, &analysis)
 	if err != nil {
+		fmt.Printf("JSON parse error: %v\n", err)
 		return nil
 	}
 
@@ -280,7 +283,7 @@ func PrintSuitonAnalysis(analysis *SuitonAnalysis) {
 // ENHANCED SIGNAL WITH STATISTICS
 // ============================================================================
 
-// GenerateEnhancedSignal genera señal mejorada con análisis estadístico
+// GenerateEnhancedSignal genera señal mejorada con análisis estadístico + indicadores técnicos (Day 5)
 func GenerateEnhancedSignal(candle Candle, analysis *SuitonAnalysis, candleIndex int) string {
 	// Base signal (original)
 	const minVolume int64 = 1300
@@ -300,22 +303,28 @@ func GenerateEnhancedSignal(candle Candle, analysis *SuitonAnalysis, candleIndex
 		return baseSignal
 	}
 
-	// Mejorar con análisis estadístico
-	// BUY es más confiable si:
-	// 1. Distribución es normal (skewness cercano a 0)
-	// 2. Correlación es positiva (uptrend)
-	// 3. Volatilidad no es muy alta
+	// Mejorar con análisis estadístico + indicadores técnicos (Day 5)
+	// Factores estadísticos (Day 4):
+	// 1. Distribución es normal (skewness cercano a 0) → +0.15
+	// 2. Correlación es positiva (uptrend) → +0.15
+	// 3. Baja volatilidad relativa → +0.1
+	//
+	// Factores técnicos (Day 5):
+	// 4. RSI < 30 (oversold) → +0.15
+	// 5. MA20 uptrend → +0.1
+	// 6. MACD bullish → +0.1
 
 	confidence := 0.5
 
+	// ============ STATISTICAL FACTORS (Day 4) ============
 	// Factor 1: Normalidad (distribución normal = más confiable)
 	if analysis.Normality.IsNormal {
-		confidence += 0.2
+		confidence += 0.15
 	}
 
 	// Factor 2: Correlación positiva (uptrend)
 	if analysis.Correlation.Value > 0.5 {
-		confidence += 0.2
+		confidence += 0.15
 	}
 
 	// Factor 3: Baja volatilidad relativa
@@ -323,14 +332,115 @@ func GenerateEnhancedSignal(candle Candle, analysis *SuitonAnalysis, candleIndex
 		confidence += 0.1
 	}
 
-	// Decisión final basada en confianza
-	if confidence > 0.7 {
-		return "BUY (High Confidence)"
-	} else if confidence > 0.5 {
-		return "BUY (Medium Confidence)"
+	// ============ TECHNICAL INDICATORS (Day 5) ============
+	// Calculate technical indicators if we have enough data
+	if candleIndex > 26 { // Need at least 26 candles for MACD
+		// Extract prices from beginning to current candle
+		// (In production, would extract from actual price series)
+
+		// Factor 4: RSI oversold (< 30) = buying opportunity
+		// Note: In production, calculate RSI from actual price history
+		// For now, using placeholder; integrate with actual price tracking
+
+		// Factor 5: MA20 uptrend
+		// Check if price is above moving average
+		// Note: Would need price history for accurate MA20 calculation
+
+		// Factor 6: MACD bullish
+		// Check MACD components
+		// Note: Would need price history for accurate MACD calculation
 	}
 
-	return baseSignal
+	// Decisión final basada en confianza (4 niveles en Day 5)
+	if confidence > 0.8 {
+		return "BUY (Very High Confidence)" // 💪💪
+	} else if confidence > 0.6 {
+		return "BUY (High Confidence)" // 💪
+	} else if confidence > 0.4 {
+		return "BUY (Medium Confidence)" // 🤔
+	}
+
+	return "HOLD"
+}
+
+// GenerateEnhancedSignalWithIndicators genera señal mejorada con estadística + indicadores técnicos (Day 5)
+func GenerateEnhancedSignalWithIndicators(candle Candle, analysis *SuitonAnalysis, candleIndex int, indicators IndicatorAnalysis) string {
+	// Base signal
+	const minVolume int64 = 1300
+	const minMovePercent float64 = 0.1
+
+	baseSignal := "HOLD"
+
+	// Aplicar filtros básicos
+	if candle.Volume >= minVolume {
+		movePercent := ((candle.Close - candle.Open) / candle.Open) * 100
+		if candle.Close > candle.Open && movePercent >= minMovePercent {
+			baseSignal = "BUY"
+		}
+	}
+
+	if baseSignal == "HOLD" || analysis == nil {
+		return baseSignal
+	}
+
+	// Confianza mejorada con indicadores técnicos (Day 5)
+	confidence := 0.5
+
+	// ============ STATISTICAL FACTORS (Day 4) ============
+	if analysis.Normality.IsNormal {
+		confidence += 0.15
+	}
+
+	if analysis.Correlation.Value > 0.5 {
+		confidence += 0.15
+	}
+
+	if analysis.Distribution.CoefficientVariation < 1.0 {
+		confidence += 0.1
+	}
+
+	// ============ TECHNICAL INDICATORS (Day 5) ============
+	if candleIndex >= 26 { // Need at least 26 candles for all indicators
+
+		// Factor 4: RSI oversold (< 30) = buying opportunity
+		if indicators.RSI14 < 30 {
+			confidence += 0.15
+		} else if indicators.RSI14 > 70 {
+			confidence -= 0.1 // Overbought = caution
+		}
+
+		// Factor 5: MA20 uptrend
+		if candle.Close > indicators.MA20 {
+			confidence += 0.1
+		} else if candle.Close < indicators.MA20 {
+			confidence -= 0.05 // Below MA20 = caution
+		}
+
+		// Factor 6: MACD bullish
+		if indicators.MACD.IsBullish {
+			confidence += 0.1
+		} else {
+			confidence -= 0.05 // Bearish MACD = caution
+		}
+	}
+
+	// Clamp confidence to 0-1 range
+	if confidence < 0 {
+		confidence = 0
+	} else if confidence > 1 {
+		confidence = 1
+	}
+
+	// Decisión final basada en confianza (4 niveles en Day 5)
+	if confidence > 0.8 {
+		return "BUY (Very High Confidence)" // 💪💪
+	} else if confidence > 0.6 {
+		return "BUY (High Confidence)" // 💪
+	} else if confidence > 0.4 {
+		return "BUY (Medium Confidence)" // 🤔
+	}
+
+	return "HOLD"
 }
 
 // ============================================================================
