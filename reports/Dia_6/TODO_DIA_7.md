@@ -196,7 +196,20 @@ CON ML:
 - Crear `reports/Dia_7/Dia_7_Log.md`
 - Crear `reports/Dia_7/ML_Model_Report.md`
 - Crear `reports/Dia_7/Resumen_01_12_2025.md`
+- ⭐ **Crear `reports/Dia_7/Resumen_for_dummies.md`** (IMPORTANT!)
 - Generar 15+ flashcards sobre ML
+
+**Resumen for Dummies - Template:**
+El "Resumen for Dummies" debe:
+- Explicar en palabras simples (no técnicas)
+- Ser legible en 5-10 minutos
+- Incluir analogías y ejemplos
+- Tener secciones: Problema, Solución, Aprendizaje, TL;DR
+- Dirigido a personas sin conocimiento técnico
+- Usar emojis y formato legible
+- Responder: ¿Qué pasó hoy en 2 minutos?
+
+**Ver ejemplo**: `reports/Dia_6/Resumen_for_dummies.md`
 
 **Flashcards Tópicos:**
 - ML model architecture
@@ -206,8 +219,8 @@ CON ML:
 - Future ML improvements
 
 **Status**: Documentación
-**Difficulty**: Baja
-**Time estimate**: 30 minutos
+**Difficulty**: Media (el for_dummies requiere escritura clara)
+**Time estimate**: 45 minutos (30 docs + 15 flashcards)
 
 ---
 
