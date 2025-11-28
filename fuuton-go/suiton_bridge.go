@@ -190,7 +190,14 @@ func LocalAnalyzeCorrelation(prices []float64) SuitonCorrelation {
 func CallSuitonR(prices []float64) *SuitonAnalysis {
 	// Ruta completa a Rscript en Windows
 	rscriptPath := "C:\\Program Files\\R\\R-4.5.2\\bin\\Rscript.exe"
-	rIpcScript := "suiton-r/r_ipc_simple.R" // Using simplified version that doesn't need jsonlite
+
+	// Get absolute path to the R script
+	workDir, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Error getting working directory: %v\n", err)
+		return nil
+	}
+	rIpcScript := workDir + "\\..\\suiton-r\\r_ipc_simple.R"
 
 	// 1. Serializar prices a JSON
 	inputData := map[string]interface{}{
@@ -198,29 +205,64 @@ func CallSuitonR(prices []float64) *SuitonAnalysis {
 	}
 	inputJSON, _ := json.Marshal(inputData)
 
-	// 2. Guardar en archivo temporal
-	tmpFile := "temp_suiton_input.json"
-	err := os.WriteFile(tmpFile, inputJSON, 0644)
+	// 2. Guardar en archivo temporal (usar ruta absoluta)
+	tmpFile := workDir + "\\temp_suiton_input.json"
+	err = os.WriteFile(tmpFile, inputJSON, 0644)
 	if err != nil {
+		fmt.Printf("Error writing temp file: %v\n", err)
 		return nil
 	}
 	defer os.Remove(tmpFile)
 
 	// 3. Ejecutar Rscript pasando el archivo como argumento
-	// r_ipc.R leerá el JSON del archivo y retornará JSON
+	// r_ipc_simple.R leerá el JSON del archivo y retornará JSON
 	cmd := exec.Command(rscriptPath, rIpcScript, tmpFile)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		// Debug: imprimir error
 		fmt.Printf("R error: %v\nOutput: %s\n", err, string(output))
+		fmt.Printf("R script path: %s\n", rIpcScript)
+		fmt.Printf("Temp file path: %s\n", tmpFile)
 		return nil
 	}
 
-	// 4. Parsear respuesta JSON
+	// 4. Parsear respuesta JSON (limpiar warnings de R)
+	outputStr := string(output)
+
+	// Buscar el inicio del JSON (el primer {)
+	jsonStart := -1
+	for i := 0; i < len(outputStr); i++ {
+		if outputStr[i] == '{' {
+			jsonStart = i
+			break
+		}
+	}
+
+	if jsonStart == -1 {
+		fmt.Printf("No JSON found in R output: %s\n", outputStr)
+		return nil
+	}
+
+	// Buscar el final del JSON (el último })
+	jsonEnd := -1
+	for i := len(outputStr) - 1; i >= jsonStart; i-- {
+		if outputStr[i] == '}' {
+			jsonEnd = i + 1
+			break
+		}
+	}
+
+	if jsonEnd == -1 {
+		fmt.Printf("Malformed JSON in R output: %s\n", outputStr)
+		return nil
+	}
+
+	jsonStr := outputStr[jsonStart:jsonEnd]
+
 	var analysis SuitonAnalysis
-	err = json.Unmarshal(output, &analysis)
+	err = json.Unmarshal([]byte(jsonStr), &analysis)
 	if err != nil {
-		fmt.Printf("JSON parse error: %v\n", err)
+		fmt.Printf("JSON parse error: %v\nJSON was: %s\n", err, jsonStr)
 		return nil
 	}
 

@@ -138,6 +138,17 @@ func main() {
 	}
 	fmt.Printf("\nTotal BUY signals: %d / %d velas\n", buyCount, len(candles))
 
+	// ========== PARAMETER TUNING (Day 6) ==========
+	tuningReport := CompareParameterResults(prices)
+	PrintTuningReport(tuningReport)
+
+	// ========== MULTIPLE DATASET TESTING (Day 6) ==========
+	TestAllDatasets()
+
+	// ========== MACHINE LEARNING PREPARATION (Day 6) ==========
+	mlFeatures := ExtractMLFeatures(prices, candles)
+	AnalyzeFeatureImportance(mlFeatures)
+
 	// ========== EJECUTAR ORQUESTADOR ==========
 	fmt.Println("\n\n=== EJECUTANDO ORQUESTADOR ===\n")
 	config := OrchestratorConfig{
